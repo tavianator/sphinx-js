@@ -16,7 +16,7 @@ Setup
 
         npm install -g jsdoc
 
-   We work with jsdoc 3.4.3, 3.5.4, and quite possibly other versions.
+   We work with jsdoc 3.6.3 and quite possibly other versions.
 
 2. Install sphinx-js, which will pull in Sphinx itself as a dependency::
 
@@ -283,7 +283,7 @@ To save some keystrokes, you can set ``primary_domain = 'js'`` in conf.py and th
 TypeScript support
 ------------------
 
-There is experimental TypeScript support in sphinx-js. Enable it by setting the config variable ``js_language = 'typescript'``. Then, instead of installing JSDoc, install TypeDoc (version 0.11.1 is known to work)::
+There is experimental TypeScript support in sphinx-js. Enable it by setting the config variable ``js_language = 'typescript'``. Then, instead of installing JSDoc, install TypeDoc (version 0.15.0 is known to work)::
 
     npm install -g typedoc
 
@@ -302,7 +302,10 @@ Configuration Reference
   A conf.py-relative path to a jsdoc or typedoc config file, which is useful if you want to specify your own jsdoc options, like recursion and custom filename matching.
 
 ``root_for_relative_js_paths``
-  The directory relative to which relative pathnames are resolved. Defaults to ``js_source_path`` if it is only one item.
+  Relative JS entity paths are resolved relative to this path. Defaults to ``js_source_path`` if it is only one item.
+
+``jsdoc_cache``
+  Path to a file where jsdoc output will be cached. If omitted, jsdoc will be run every time Sphinx is. If you have a large number of source files, it may be beneficial to configure this value. But be careful: the cache is not automatically flushed if your source code changes; you must delete it manually.
 
 Example
 =======
@@ -317,9 +320,9 @@ A good example using most of sphinx-js's functionality is the Fathom documentati
 
 Then put the version of sphinx-js you want in ``docs/requirements.txt``. For example... ::
 
-    sphinx-js==2.5
+    sphinx-js==3.0
 
-Or, if you prefer, the Fathom repo carries a `Travis CI configuration <https://github.com/mozilla/fathom/blob/master/.travis.yml>`_ and a `deployment script <https://github.com/mozilla/fathom/blob/master/docs/tooling/travis-deploy-docs>`_ for building docs with sphinx-js and publishing them to GitHub Pages. Feel free to borrow them.
+Or, if you prefer, the Fathom repo carries a `Travis CI configuration <https://github.com/mozilla/fathom/blob/92304b8ad4768e90c167c3d93f9865771f5a6d80/.travis.yml#L41>`_ and a `deployment script <https://github.com/mozilla/fathom/blob/92304b8ad4768e90c167c3d93f9865771f5a6d80/tooling/travis-deploy-docs>`_ for building docs with sphinx-js and publishing them to GitHub Pages. Feel free to borrow them.
 
 Caveats
 =======
@@ -330,10 +333,31 @@ Caveats
 Tests
 =====
 
-Run ``python setup.py test``. Run ``tox`` to test across Python versions.
+Run the tests using tox, which will also install jsdoc and typedoc at pinned versions::
+
+    pip install tox
+    tox
 
 Version History
 ===============
+
+3.0.1
+  * Don't crash when encountering a ``../`` prefix on an object path. This can happen behind the scenes when ``root_for_relative_js_paths`` is set inward of the JS code.
+
+3.0
+  * Make compatible with Sphinx 3, which requires Python 3.
+  * Drop support for Python 2.
+  * Make sphinx-js not care what the current working directory is, except for the TypeScript analyzer, which needs further work.
+  * Properly RST-escape return types.
+
+2.8
+  * Display generic TypeScript types properly. Make fields come before methods. (Paul Grau)
+  * Combine constructor and class documentation at the top TypeScript classes. (Sebastian Weigand)
+  * Switch to pytest as the testrunner. (Sebastian Weigand)
+  * Add optional caching of jsdoc output, for large codebases. (Patrick Browne)
+  * Fix the display of union types in TypeScript. (Sebastian Weigand)
+  * Fix parsing breakage that began in typedoc 0.14.0. (Paul Grau)
+  * Fix a data-intake crash with TypeScript. (Cristiano Santos)
 
 2.7.1
   * Fix a crash that would happen sometimes with UTF-8 on Windows. #67.

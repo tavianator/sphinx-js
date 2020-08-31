@@ -4,8 +4,6 @@ import os
 import sys
 import json
 
-from six import iteritems
-
 # JSDoc entries used in sphinx-js:
 # - optional access of [ public, private, protected ]
 # - optional classdesc
@@ -76,7 +74,7 @@ class TypeDoc(object):
            the description field in :py:func:`make_result`.
         """
         result.update(**kwargs)
-        return {k: v for k, v in iteritems(result) if v is not None}
+        return {k: v for k, v in result.items() if v is not None}
 
     def make_doclet(self, **kwargs):
         """Create a new jsdoc entry"""
@@ -134,7 +132,7 @@ class TypeDoc(object):
         elif type.get('type') == 'array':
             names = [self.make_type_name(type.get('elementType'))[0] + '[]']
         elif type.get('type') == 'tuple' and type.get('elements'):
-            types = [self.make_type_name(t) for t in type.get('elements')]
+            types = ['|'.join(self.make_type_name(t)) for t in type.get('elements')]
             names = ['[' + ','.join(types) + ']']
         elif type.get('type') == 'union':
             names = [self.make_type_name(t)[0] for t in type.get('types') if self.make_type_name(t)]
@@ -148,6 +146,9 @@ class TypeDoc(object):
                 names.extend(['extends', self.make_type_name(constraint)])
         elif type.get('type') == 'reflection':
             names = ['<TODO>']
+        if type.get('typeArguments'):
+            argNames = ['|'.join(self.make_type_name(arg)) for arg in type.get('typeArguments')]
+            names = [names[0] + '<' + ','.join(argNames) + '>']
         return names
 
     def make_type(self, type):
@@ -286,7 +287,7 @@ class TypeDoc(object):
                     doclet['params'].append(self.make_param(param))
 
             if kindString == 'Class':
-                for child in node.get('children'):
+                for child in node.get('children', []):
                     if (child.get('kindString') == 'Constructor'):
                         child_comment = child.get('comment', {})
                         child_description = self.make_description(child_comment)

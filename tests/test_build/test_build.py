@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_in, assert_not_in
-
 from tests.testing import SphinxBuildTestCase
 
 
@@ -113,9 +111,11 @@ class Tests(SphinxBuildTestCase):
         self._file_contents_eq(
             'autofunction_deprecated',
             'deprecatedFunction()\n\n'
-            '   Note: Deprecated.\n\n'
+            '   Note:\n\n'
+            '     Deprecated.\n\n'
             'deprecatedExplanatoryFunction()\n\n'
-            "   Note: Deprecated: don't use anymore\n")
+            '   Note:\n\n'
+            "     Deprecated: don't use anymore\n")
 
     def test_autofunction_see(self):
         """Make sure @see tags work with autofunction."""
@@ -131,8 +131,8 @@ class Tests(SphinxBuildTestCase):
         """Make sure classes show their class comment and constructor
         comment."""
         contents = self._file_contents('autoclass')
-        assert_in('Class doc.', contents)
-        assert_in('Constructor doc.', contents)
+        assert 'Class doc.' in contents
+        assert 'Constructor doc.' in contents
 
     def test_autoclass_members(self):
         """Make sure classes list their members if ``:members:`` is specified.
@@ -171,15 +171,15 @@ class Tests(SphinxBuildTestCase):
         """Make sure classes list their private members if
         ``:private-members:`` is specified."""
         contents = self._file_contents('autoclass_private_members')
-        assert_in('secret()', contents)
+        assert 'secret()' in contents
 
     def test_autoclass_exclude_members(self):
         """Make sure ``exclude-members`` option actually excludes listed
         members."""
         contents = self._file_contents('autoclass_exclude_members')
-        assert_in('publical()', contents)
-        assert_not_in('publical2', contents)
-        assert_not_in('publical3', contents)
+        assert 'publical()' in contents
+        assert 'publical2' not in contents
+        assert 'publical3' not in contents
 
     def test_autoclass_example(self):
         """Make sure @example tags can be documented with autoclass."""
@@ -196,9 +196,11 @@ class Tests(SphinxBuildTestCase):
         self._file_contents_eq(
             'autoclass_deprecated',
             'class DeprecatedClass()\n\n'
-            '   Note: Deprecated.\n\n'
+            '   Note:\n\n'
+            '     Deprecated.\n\n'
             'class DeprecatedExplanatoryClass()\n\n'
-            "   Note: Deprecated: don't use anymore\n")
+            '   Note:\n\n'
+            "     Deprecated: don't use anymore\n")
 
     def test_autoclass_see(self):
         """Make sure @see tags work with autoclass."""
@@ -231,9 +233,11 @@ class Tests(SphinxBuildTestCase):
         self._file_contents_eq(
             'autoattribute_deprecated',
             'DeprecatedAttribute\n\n'
-            '   Note: Deprecated.\n\n'
+            '   Note:\n\n'
+            '     Deprecated.\n\n'
             'DeprecatedExplanatoryAttribute\n\n'
-            "   Note: Deprecated: don't use anymore\n")
+            '   Note:\n\n'
+            "     Deprecated: don't use anymore\n")
 
     def test_autoattribute_see(self):
         """Make sure @see tags work with autoattribute."""
@@ -259,15 +263,20 @@ class Tests(SphinxBuildTestCase):
 
     def test_restructuredtext_injection(self):
         """Make sure param names and types are escaped and cannot be
-        interpreted as RestructuredText."""
+        interpreted as RestructuredText.
+
+        Descriptions should not be escaped; it is a feature to be able to use
+        RST markup there.
+
+        """
         self._file_contents_eq(
             'injection',
             u'injection(a_, b)\n\n'
             '   Arguments:\n'
             '      * **a_** --\n\n'
-            '      * **b** (*type_*) --\n\n'
+            '      * **b** (*type_*) -- >>Borf_<<\n\n'
             '   Returns:\n'
-            '      **rtype_** --\n')
+            '      **rtype_** -- >>Dorf_<<\n')
 
 
 DESCRIPTION = """

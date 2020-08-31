@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
 from io import open
 from os.path import dirname, join
 from shutil import rmtree
 from unittest import TestCase
 import sys
 
-from nose.tools import eq_
-from sphinx.cmdline import main as sphinx_main
+from sphinx.cmd.build import main as sphinx_main
 from sphinx.util.osutil import cd
 
 
@@ -18,8 +18,8 @@ class SphinxBuildTestCase(TestCase):
     def setup_class(cls):
         """Run Sphinx against the dir adjacent to the testcase."""
         cls.docs_dir = join(cls.this_dir(), 'source', 'docs')
-        with cd(cls.docs_dir):
-            if sphinx_main(['.', '-b', 'text', '-E', '_build']):
+        with cd(cls.docs_dir):  # Matters only to keep test_build_ts tests passing. Remove once we clean that module up. Its cwd-sensitivity still means it doesn't work for actual users if the cwd isn't just right.
+            if sphinx_main([cls.docs_dir, '-b', 'text', '-v', '-E', join(cls.docs_dir, '_build')]):
                 raise RuntimeError('Sphinx build exploded.')
 
     @classmethod
@@ -39,4 +39,4 @@ class SphinxBuildTestCase(TestCase):
             return file.read()
 
     def _file_contents_eq(self, filename, contents):
-        eq_(self._file_contents(filename), contents)
+        assert self._file_contents(filename) == contents
